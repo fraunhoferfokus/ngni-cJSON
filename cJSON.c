@@ -61,6 +61,10 @@
 #define true ((cJSON_bool)1)
 #define false ((cJSON_bool)0)
 
+#ifdef ENABLE_ENV_FEATURE
+static int json_allow_env_parsing = 0;
+#endif
+
 typedef struct {
     const unsigned char *json;
     size_t position;
@@ -261,6 +265,62 @@ typedef struct
 #define cannot_access_at_index(buffer, index) (!can_access_at_index(buffer, index))
 /* get a pointer to the buffer at the position */
 #define buffer_at_offset(buffer) ((buffer)->content + (buffer)->offset)
+
+#ifdef ENABLE_ENV_FEATURE
+static cJSON_bool parse_environment_variable(cJSON *const item, parse_buffer *const input_buffer)
+{
+    unsigned char env_c_string[64];
+    unsigned char *output = NULL;
+    size_t i = 0;
+
+
+    if ((input_buffer == NULL) || (input_buffer->content == NULL))
+    {
+        return false;
+    }
+    if (can_access_at_index(input_buffer, 0) && buffer_at_offset(input_buffer)[0] == '%')
+        input_buffer->offset++;
+
+    for (i = 0; (i < (sizeof(env_c_string) - 1)) && can_access_at_index(input_buffer, i); i++)
+    {
+        unsigned char c=buffer_at_offset(input_buffer)[i];
+        if ( ((c >= 'a') && (c <= 'z')) ||
+             ((c >= 'A') && (c <= 'Z')) ||
+             ((c >= '0') && (c <= '9')) ||
+             (c == '_') )
+        {
+            env_c_string[i] = buffer_at_offset(input_buffer)[i];
+        } else {
+            env_c_string[i] = '\0';
+            break;
+        }
+    }/* for */
+
+    if (i<1){
+        return false;
+    }
+
+    env_c_string[i] = '\0';
+    output = (unsigned char*)input_buffer->hooks.allocate(i + sizeof(""));
+    if (output == NULL)
+    {
+        goto fail; /* allocation failure */
+    }
+    item->type = cJSON_EnvironmentVar;
+    memcpy(output,env_c_string, i+1);
+    item->valuestring = (char *)output;
+
+    input_buffer->offset += i;
+    return true;
+
+fail:
+    if (output != NULL)
+    {
+        input_buffer->hooks.deallocate(output);
+    }
+    return false;
+}
+#endif
 
 /* Parse the input text to generate a number, and populate the result into item. */
 static cJSON_bool parse_number(cJSON * const item, parse_buffer * const input_buffer)
@@ -996,6 +1056,18 @@ static parse_buffer *skip_utf8_bom(parse_buffer * const buffer)
     return buffer;
 }
 
+#ifdef ENABLE_ENV_FEATURE
+CJSON_PUBLIC(void) cJSON_EnableFeatureEnvironmentVariables(void)
+{
+    json_allow_env_parsing = 1;
+}
+CJSON_PUBLIC(void) cJSON_DisableFeatureEnvironmentVariables(void)
+{
+    json_allow_env_parsing = 0;
+}
+#endif
+
+
 /* Parse an object - create a new root, and populate. */
 CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts(const char *value, const char **return_parse_end, cJSON_bool require_null_terminated)
 {
@@ -1244,6 +1316,13 @@ static cJSON_bool parse_value(cJSON * const item, parse_buffer * const input_buf
     {
         return parse_string(item, input_buffer);
     }
+#ifdef ENABLE_ENV_FEATURE
+    /* FOKUS: envoriment variables %XXX, */
+    if ((json_allow_env_parsing == 1) && can_access_at_index(input_buffer, 0) && (buffer_at_offset(input_buffer)[0] == '%'))
+    {
+        return parse_environment_variable(item, input_buffer);
+    }
+#endif
     /* number */
     if (can_access_at_index(input_buffer, 0) && ((buffer_at_offset(input_buffer)[0] == '-') || ((buffer_at_offset(input_buffer)[0] >= '0') && (buffer_at_offset(input_buffer)[0] <= '9'))))
     {

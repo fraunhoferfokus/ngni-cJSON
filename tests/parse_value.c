@@ -96,6 +96,21 @@ static void parse_value_should_parse_object(void)
     reset(item);
 }
 
+#ifdef ENABLE_ENV_FEATURE
+static void parse_value_should_parse_env(void)
+{
+    cJSON_EnableFeatureEnvironmentVariables();
+    assert_parse_value("%RANDOMENV", cJSON_EnvironmentVar);
+    reset(item);
+    assert_parse_value("%x%", cJSON_EnvironmentVar);
+    reset(item);
+    assert_parse_value("%ENV,", cJSON_EnvironmentVar);
+    reset(item);
+
+    cJSON_DisableFeatureEnvironmentVariables();
+}
+#endif
+
 int CJSON_CDECL main(void)
 {
     /* initialize cJSON item */
@@ -108,5 +123,8 @@ int CJSON_CDECL main(void)
     RUN_TEST(parse_value_should_parse_string);
     RUN_TEST(parse_value_should_parse_array);
     RUN_TEST(parse_value_should_parse_object);
+#ifdef ENABLE_ENV_FEATURE
+    RUN_TEST(parse_value_should_parse_env);
+#endif
     return UNITY_END();
 }

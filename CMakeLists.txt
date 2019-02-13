@@ -241,6 +241,11 @@ if(ENABLE_CJSON_TEST)
         DEPENDS ${TEST_CJSON})
 endif()
 
+option(ENABLE_ENV_FEATURE "Enable support for Environment Variables (%VAR) in json" Off)
+if (ENABLE_ENV_FEATURE)
+    add_definitions(-DENABLE_ENV_FEATURE)
+endif()
+
 # Enable the use of locales
 option(ENABLE_LOCALES "Enable the use of locales" ON)
 if(ENABLE_LOCALES)
