@@ -107,6 +107,12 @@ static void parse_value_should_parse_env(void)
     assert_parse_value("%ENV,", cJSON_EnvironmentVar);
     reset(item);
 
+    assert_parse_value("[%ENV]", cJSON_Array);
+    reset(item);
+
+    assert_parse_value("{%ENV}", cJSON_Object);
+    reset(item);
+
     cJSON_DisableFeatureEnvironmentVariables();
 }
 #endif
