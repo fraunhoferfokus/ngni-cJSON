@@ -1352,7 +1352,7 @@ static cJSON_bool print_value(const cJSON * const item, printbuffer * const outp
         return false;
     }
 
-    switch ((item->type) & 0xFF)
+    switch ((item->type) & 0xffFF)
     {
         case cJSON_NULL:
             output = ensure(output_buffer, 5);
