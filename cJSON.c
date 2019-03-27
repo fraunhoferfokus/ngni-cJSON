@@ -1411,6 +1411,25 @@ static cJSON_bool print_value(const cJSON * const item, printbuffer * const outp
         case cJSON_Object:
             return print_object(item, output_buffer);
 
+#ifdef ENABLE_ENV_FEATURE
+        case cJSON_EnvironmentVar:{
+            size_t raw_length = 0;
+            if (item->valuestring == NULL)
+            {
+                return false;
+            }
+
+            raw_length = strlen(item->valuestring) + sizeof("");
+            output = ensure(output_buffer, raw_length+1);
+            if (output == NULL)
+            {
+                return false;
+            }
+            output[0]='%';
+            memcpy(output+1, item->valuestring, raw_length);
+            return true;
+        }
+#endif
         default:
             return false;
     }

@@ -88,7 +88,21 @@ static void print_value_should_print_array(void)
 static void print_value_should_print_object(void)
 {
     assert_print_value("{}");
+#ifdef ENABLE_ENV_FEATURE
+    cJSON_EnableFeatureEnvironmentVariables();
+    assert_print_value("%TERM");
+    cJSON_DisableFeatureEnvironmentVariables();
+#endif
 }
+
+#ifdef ENABLE_ENV_FEATURE
+static void print_value_should_print_env(void)
+{
+    cJSON_EnableFeatureEnvironmentVariables();
+    assert_print_value("%TERM");
+    cJSON_DisableFeatureEnvironmentVariables();
+}
+#endif
 
 int CJSON_CDECL main(void)
 {
@@ -102,6 +116,9 @@ int CJSON_CDECL main(void)
     RUN_TEST(print_value_should_print_string);
     RUN_TEST(print_value_should_print_array);
     RUN_TEST(print_value_should_print_object);
+#ifdef ENABLE_ENV_FEATURE
+    RUN_TEST(print_value_should_print_env);
+#endif
 
     return UNITY_END();
 }
