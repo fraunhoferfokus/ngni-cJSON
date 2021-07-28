@@ -37,7 +37,7 @@ static cJSON *parse_test_file(const char * const filename)
     file = read_file(filename);
     TEST_ASSERT_NOT_NULL_MESSAGE(file, "Failed to read file.");
 
-    json = cJSON_Parse(file);
+    json = cJSON_Parse(file, 0);
     TEST_ASSERT_NOT_NULL_MESSAGE(json, "Failed to parse test json.");
     TEST_ASSERT_TRUE_MESSAGE(cJSON_IsArray(json), "Json is not an array.");
 
@@ -81,7 +81,7 @@ static cJSON_bool test_apply_patch(const cJSON * const test)
     patch = cJSON_GetObjectItemCaseSensitive(test, "patch");
     TEST_ASSERT_NOT_NULL_MESSAGE(patch, "No \"patch\"in the test.");
     /* Make a working copy of 'doc' */
-    object = cJSON_Duplicate(doc, true);
+    object = cJSON_Duplicate(doc, true, 0);
     TEST_ASSERT_NOT_NULL(object);
 
     expected = cJSON_GetObjectItemCaseSensitive(test, "expected");
@@ -142,7 +142,7 @@ static cJSON_bool test_generate_test(cJSON *test)
     TEST_ASSERT_NOT_NULL_MESSAGE(doc, "No \"doc\" in the test.");
 
     /* Make a working copy of 'doc' */
-    object = cJSON_Duplicate(doc, true);
+    object = cJSON_Duplicate(doc, true, 0);
     TEST_ASSERT_NOT_NULL(object);
 
     expected = cJSON_GetObjectItemCaseSensitive(test, "expected");

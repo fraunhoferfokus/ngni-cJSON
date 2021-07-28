@@ -323,7 +323,7 @@ static void cjson_replace_item_via_pointer_should_replace_items(void)
     TEST_ASSERT_NULL(replacements[2].next);
     TEST_ASSERT_TRUE(replacements[1].next == &(replacements[2]));
 
-    cJSON_free(array);
+    cJSON_free(array, 1);
 }
 
 static void cjson_replace_item_in_object_should_preserve_name(void)
@@ -438,20 +438,25 @@ static void * CJSON_CDECL failing_realloc(void *pointer, size_t size)
     (void)pointer;
     return NULL;
 }
+static void * internal_fail_realloc_malloc(size_t size, void * alloc_param)
+{
+	if(alloc_param != 0 || 1)
+		return malloc(size);
+}
 
 static void ensure_should_fail_on_failed_realloc(void)
 {
-    printbuffer buffer = {NULL, 10, 0, 0, false, false, {&malloc, &free, &failing_realloc}};
+    printbuffer buffer = {NULL, 10, 0, 0, false, false, {&internal_fail_realloc_malloc, &free, &failing_realloc, 0}};
     buffer.buffer = (unsigned char*)malloc(100);
     TEST_ASSERT_NOT_NULL(buffer.buffer);
 
-    TEST_ASSERT_NULL_MESSAGE(ensure(&buffer, 200), "Ensure didn't fail with failing realloc.");
+    TEST_ASSERT_NULL_MESSAGE(ensure(&buffer, 200, 0), "Ensure didn't fail with failing realloc.");
 }
 
 static void skip_utf8_bom_should_skip_bom(void)
 {
     const unsigned char string[] = "\xEF\xBB\xBF{}";
-    parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };
+    parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0, 0 } };
     buffer.content = string;
     buffer.length = sizeof(string);
     buffer.hooks = global_hooks;
@@ -463,7 +468,7 @@ static void skip_utf8_bom_should_skip_bom(void)
 static void skip_utf8_bom_should_not_skip_bom_if_not_at_beginning(void)
 {
     const unsigned char string[] = " \xEF\xBB\xBF{}";
-    parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };
+    parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0, 0 } };
     buffer.content = string;
     buffer.length = sizeof(string);
     buffer.hooks = global_hooks;
@@ -534,7 +539,7 @@ static void cjson_add_item_to_object_should_not_use_after_free_when_string_is_al
 {
     cJSON *object = cJSON_CreateObject();
     cJSON *number = cJSON_CreateNumber(42);
-    char *name = (char*)cJSON_strdup((const unsigned char*)"number", &global_hooks);
+    char *name = (char*)cJSON_strdup((const unsigned char*)"number", &global_hooks, 0);
 
     TEST_ASSERT_NOT_NULL(object);
     TEST_ASSERT_NOT_NULL(number);

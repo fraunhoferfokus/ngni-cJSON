@@ -130,6 +130,7 @@ typedef struct cJSON_Hooks
       /* malloc/free are CDECL on Windows regardless of the default calling convention of the compiler, so ensure the hooks allow passing those functions directly. */
       void *(CJSON_CDECL *malloc_fn)(size_t sz, void * alloc_param);
       void (CJSON_CDECL *free_fn)(void *ptr);
+      int use_custom_free_only_if_param;
 } cJSON_Hooks;
 
 typedef int cJSON_bool;
@@ -300,8 +301,12 @@ CJSON_PUBLIC(void) cJSON_DeleteItemFromObjectCaseSensitive(cJSON *object, const 
 CJSON_PUBLIC(void) cJSON_InsertItemInArray(cJSON *array, int which, cJSON *newitem); /* Shifts pre-existing items to the right. */
 CJSON_PUBLIC(cJSON_bool) cJSON_ReplaceItemViaPointer(cJSON * const parent, cJSON * const item, cJSON * replacement);
 CJSON_PUBLIC(void) cJSON_ReplaceItemInArray(cJSON *array, int which, cJSON *newitem);
-CJSON_PUBLIC(void) cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
-CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
+
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObject_mp(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive_mp(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
+
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem);
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive(cJSON *object,const char *string,cJSON *newitem);
 
 /* Duplicate a cJSON item */
 CJSON_PUBLIC(cJSON *) cJSON_Duplicate_mp(const cJSON *item, cJSON_bool recurse, void * alloc_param);
@@ -358,7 +363,7 @@ CJSON_PUBLIC(double) cJSON_SetNumberHelper(cJSON *object, double number);
 
 /* malloc/free objects using the malloc/free functions that have been set with cJSON_InitHooks */
 CJSON_PUBLIC(void *) cJSON_malloc(size_t size, void * alloc_param);
-CJSON_PUBLIC(void) cJSON_free(void *object);
+CJSON_PUBLIC(void) cJSON_free(void *object, int use_custom_deallocate);
 
 #ifdef __cplusplus
 }

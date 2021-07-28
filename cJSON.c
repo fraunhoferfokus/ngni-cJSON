@@ -126,6 +126,7 @@ typedef struct internal_hooks
     void *(CJSON_CDECL *allocate)(size_t size, void * alloc_param);
     void (CJSON_CDECL *deallocate)(void *pointer);
     void *(CJSON_CDECL *reallocate)(void *pointer, size_t size);
+	int use_custom_free_only_if_param;
 } internal_hooks;
 
 /* work around MSVC error C2322: '...' address of dillimport '...' is not static */
@@ -143,7 +144,7 @@ static void * CJSON_CDECL internal_realloc(void *pointer, size_t size)
     return realloc(pointer, size);
 }
 
-static internal_hooks global_hooks = { internal_malloc, internal_free, internal_realloc };
+static internal_hooks global_hooks = { internal_malloc, internal_free, internal_realloc, 0 };
 
 static unsigned char* cJSON_strdup(const unsigned char* string, const internal_hooks * const hooks, void * alloc_param)
 {
@@ -174,6 +175,7 @@ CJSON_PUBLIC(void) cJSON_InitHooks(cJSON_Hooks* hooks)
         global_hooks.allocate = internal_malloc;
         global_hooks.deallocate = free;
         global_hooks.reallocate = realloc;
+		global_hooks.use_custom_free_only_if_param = 0;
         return;
     }
 
@@ -188,6 +190,7 @@ CJSON_PUBLIC(void) cJSON_InitHooks(cJSON_Hooks* hooks)
     {
         global_hooks.deallocate = hooks->free_fn;
     }
+	global_hooks.use_custom_free_only_if_param = hooks->use_custom_free_only_if_param;
 
     /* use realloc only if both free and malloc are used */
     global_hooks.reallocate = NULL;
@@ -1066,7 +1069,7 @@ CJSON_PUBLIC(void) cJSON_DisableFeatureEnvironmentVariables(void)
 /* Parse an object - create a new root, and populate. */
 CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts_mp(const char *value, const char **return_parse_end, cJSON_bool require_null_terminated, void * alloc_param)
 {
-    parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };
+    parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0, 0 } };
     cJSON *item = NULL;
 
     /* reset error position */
@@ -1240,7 +1243,7 @@ CJSON_PUBLIC(char *) cJSON_PrintUnformatted_mp(const cJSON *item, void * alloc_p
 
 CJSON_PUBLIC(char *) cJSON_PrintBuffered_mp(const cJSON *item, int prebuffer, cJSON_bool fmt, void * alloc_param)
 {
-    printbuffer p = { 0, 0, 0, 0, 0, 0, { 0, 0, 0 } };
+    printbuffer p = { 0, 0, 0, 0, 0, 0, { 0, 0, 0, 0 } };
 
     if (prebuffer < 0)
     {
@@ -1270,7 +1273,7 @@ CJSON_PUBLIC(char *) cJSON_PrintBuffered_mp(const cJSON *item, int prebuffer, cJ
 
 CJSON_PUBLIC(cJSON_bool) cJSON_PrintPreallocated_mp(cJSON *item, char *buf, const int len, const cJSON_bool fmt, void * alloc_param)
 {
-    printbuffer p = { 0, 0, 0, 0, 0, 0, { 0, 0, 0 } };
+    printbuffer p = { 0, 0, 0, 0, 0, 0, { 0, 0, 0, 0 } };
 
     if ((len < 0) || (buf == NULL))
     {
@@ -2418,7 +2421,12 @@ static cJSON_bool replace_item_in_object(cJSON *object, const char *string, cJSO
     /* replace the name in the replacement */
     if (!(replacement->type & cJSON_StringIsConst) && (replacement->string != NULL))
     {
-        cJSON_free(replacement->string);
+		if(alloc_param || global_hooks.use_custom_free_only_if_param == 0) {
+			cJSON_free(replacement->string, 1);
+		} else {
+			cJSON_free(replacement->string, 0);
+		}
+
     }
     replacement->string = (char*)cJSON_strdup((const unsigned char*)string, &global_hooks, alloc_param);
     replacement->type &= ~cJSON_StringIsConst;
@@ -2428,14 +2436,24 @@ static cJSON_bool replace_item_in_object(cJSON *object, const char *string, cJSO
     return true;
 }
 
-CJSON_PUBLIC(void) cJSON_ReplaceItemInObject(cJSON *object, const char *string, cJSON *newitem, void * alloc_param)
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObject_mp(cJSON *object, const char *string, cJSON *newitem, void * alloc_param)
 {
     replace_item_in_object(object, string, newitem, false, alloc_param);
 }
 
-CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive(cJSON *object, const char *string, cJSON *newitem, void * alloc_param)
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive_mp(cJSON *object, const char *string, cJSON *newitem, void * alloc_param)
 {
     replace_item_in_object(object, string, newitem, true, alloc_param);
+}
+
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObject(cJSON *object, const char *string, cJSON *newitem)
+{
+	replace_item_in_object(object, string, newitem, false, 0);
+}
+
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive(cJSON *object, const char *string, cJSON *newitem)
+{
+	replace_item_in_object(object, string, newitem, true, 0);
 }
 
 
@@ -3210,7 +3228,12 @@ CJSON_PUBLIC(void *) cJSON_malloc(size_t size, void * alloc_param)
     return global_hooks.allocate(size, alloc_param);
 }
 
-CJSON_PUBLIC(void) cJSON_free(void *object)
+CJSON_PUBLIC(void) cJSON_free(void *object, int use_custom_deallocate)
 {
-    global_hooks.deallocate(object);
+	if(use_custom_deallocate) {
+		global_hooks.deallocate(object);
+	} else {
+		free(object);
+	}
+
 }
