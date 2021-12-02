@@ -153,20 +153,20 @@ CJSON_PUBLIC(void) cJSON_DisableFeatureEnvironmentVariables(void);
 
 /* Memory Management: the caller is always responsible to free the results from all variants of cJSON_Parse (with cJSON_Delete) and cJSON_Print (with stdlib free, cJSON_Hooks.free_fn, or cJSON_free as appropriate). The exception is cJSON_PrintPreallocated, where the caller has full responsibility of the buffer. */
 /* Supply a block of JSON, and this returns a cJSON object you can interrogate. */
-CJSON_PUBLIC(cJSON *) cJSON_Parse_mp(const char *value, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_Parse_param(const char *value, void * alloc_param);
 /* ParseWithOpts allows you to require (and check) that the JSON is null terminated, and to retrieve the pointer to the final byte parsed. */
 /* If you supply a ptr in return_parse_end and parsing fails, then return_parse_end will contain a pointer to the error so will match cJSON_GetErrorPtr(). */
-CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts_mp(const char *value, const char **return_parse_end, cJSON_bool require_null_terminated, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts_param(const char *value, const char **return_parse_end, cJSON_bool require_null_terminated, void * alloc_param);
 
 /* Render a cJSON entity to text for transfer/storage. */
-CJSON_PUBLIC(char *) cJSON_Print_mp(const cJSON *item, void * alloc_param);
+CJSON_PUBLIC(char *) cJSON_Print_param(const cJSON *item, void * alloc_param);
 /* Render a cJSON entity to text for transfer/storage without any formatting. */
-CJSON_PUBLIC(char *) cJSON_PrintUnformatted_mp(const cJSON *item, void * alloc_param);
+CJSON_PUBLIC(char *) cJSON_PrintUnformatted_param(const cJSON *item, void * alloc_param);
 /* Render a cJSON entity to text using a buffered strategy. prebuffer is a guess at the final size. guessing well reduces reallocation. fmt=0 gives unformatted, =1 gives formatted */
-CJSON_PUBLIC(char *) cJSON_PrintBuffered_mp(const cJSON *item, int prebuffer, cJSON_bool fmt, void * alloc_param);
+CJSON_PUBLIC(char *) cJSON_PrintBuffered_param(const cJSON *item, int prebuffer, cJSON_bool fmt, void * alloc_param);
 /* Render a cJSON entity to text using a buffer already allocated in memory with given length. Returns 1 on success and 0 on failure. */
 /* NOTE: cJSON is not always 100% accurate in estimating how much memory it will use, so to be safe allocate 5 bytes more than you actually need */
-CJSON_PUBLIC(cJSON_bool) cJSON_PrintPreallocated_mp(cJSON *item, char *buffer, const int length, const cJSON_bool format, void * alloc_param);
+CJSON_PUBLIC(cJSON_bool) cJSON_PrintPreallocated_param(cJSON *item, char *buffer, const int length, const cJSON_bool format, void * alloc_param);
 
 /* Memory Management: the caller is always responsible to free the results from all variants of cJSON_Parse (with cJSON_Delete) and cJSON_Print (with stdlib free, cJSON_Hooks.free_fn, or cJSON_free as appropriate). The exception is cJSON_PrintPreallocated, where the caller has full responsibility of the buffer. */
 /* Supply a block of JSON, and this returns a cJSON object you can interrogate. */
@@ -215,16 +215,16 @@ CJSON_PUBLIC(cJSON_bool) cJSON_IsObject(const cJSON * const item);
 CJSON_PUBLIC(cJSON_bool) cJSON_IsRaw(const cJSON * const item);
 
 /* These calls create a cJSON item of the appropriate type. */
-CJSON_PUBLIC(cJSON *) cJSON_CreateNull_mp(void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateTrue_mp(void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateFalse_mp(void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateBool_mp(cJSON_bool boolean, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateNumber_mp(double num, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateString_mp(const char *string, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateNull_param(void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateTrue_param(void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateFalse_param(void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateBool_param(cJSON_bool boolean, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateNumber_param(double num, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateString_param(const char *string, void * alloc_param);
 /* raw json */
-CJSON_PUBLIC(cJSON *) cJSON_CreateRaw_mp(const char *raw, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateArray_mp(void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateObject_mp(void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateRaw_param(const char *raw, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateArray_param(void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateObject_param(void * alloc_param);
 
 /* These calls create a cJSON item of the appropriate type. */
 CJSON_PUBLIC(cJSON *) cJSON_CreateNull(void);
@@ -240,17 +240,17 @@ CJSON_PUBLIC(cJSON *) cJSON_CreateObject(void);
 
 /* Create a string where valuestring references a string so
  * it will not be freed by cJSON_Delete */
-CJSON_PUBLIC(cJSON *) cJSON_CreateStringReference_mp(const char *string, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateStringReference_param(const char *string, void * alloc_param);
 /* Create an object/arrray that only references it's elements so
  * they will not be freed by cJSON_Delete */
-CJSON_PUBLIC(cJSON *) cJSON_CreateObjectReference_mp(const cJSON *child, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateArrayReference_mp(const cJSON *child, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateObjectReference_param(const cJSON *child, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateArrayReference_param(const cJSON *child, void * alloc_param);
 
 /* These utilities create an Array of count items. */
-CJSON_PUBLIC(cJSON *) cJSON_CreateIntArray_mp(const int *numbers, int count, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateFloatArray_mp(const float *numbers, int count, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateDoubleArray_mp(const double *numbers, int count, void * alloc_param);
-CJSON_PUBLIC(cJSON *) cJSON_CreateStringArray_mp(const char **strings, int count, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateIntArray_param(const int *numbers, int count, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateFloatArray_param(const float *numbers, int count, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateDoubleArray_param(const double *numbers, int count, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_CreateStringArray_param(const char **strings, int count, void * alloc_param);
 
 /* Create a string where valuestring references a string so
  * it will not be freed by cJSON_Delete */
@@ -269,14 +269,14 @@ CJSON_PUBLIC(cJSON *) cJSON_CreateStringArray(const char **strings, int count);
 /* Append item to the specified array/object. */
 CJSON_PUBLIC(void) cJSON_AddItemToArray(cJSON *array, cJSON *item);
 
-CJSON_PUBLIC(void) cJSON_AddItemToObject_mp(cJSON *object, const char *string, cJSON *item, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_AddItemToObject_param(cJSON *object, const char *string, cJSON *item, void * alloc_param);
 /* Use this when string is definitely const (i.e. a literal, or as good as), and will definitely survive the cJSON object.
  * WARNING: When this function was used, make sure to always check that (item->type & cJSON_StringIsConst) is zero before
  * writing to `item->string` */
-CJSON_PUBLIC(void) cJSON_AddItemToObjectCS_mp(cJSON *object, const char *string, cJSON *item, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_AddItemToObjectCS_param(cJSON *object, const char *string, cJSON *item, void * alloc_param);
 /* Append reference to item to the specified array/object. Use this when you want to add an existing cJSON to a new cJSON, but don't want to corrupt your existing cJSON. */
-CJSON_PUBLIC(void) cJSON_AddItemReferenceToArray_mp(cJSON *array, cJSON *item, void * alloc_param);
-CJSON_PUBLIC(void) cJSON_AddItemReferenceToObject_mp(cJSON *object, const char *string, cJSON *item, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_AddItemReferenceToArray_param(cJSON *array, cJSON *item, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_AddItemReferenceToObject_param(cJSON *object, const char *string, cJSON *item, void * alloc_param);
 
 CJSON_PUBLIC(void) cJSON_AddItemToObject(cJSON *object, const char *string, cJSON *item);
 /* Use this when string is definitely const (i.e. a literal, or as good as), and will definitely survive the cJSON object.
@@ -301,14 +301,14 @@ CJSON_PUBLIC(void) cJSON_InsertItemInArray(cJSON *array, int which, cJSON *newit
 CJSON_PUBLIC(cJSON_bool) cJSON_ReplaceItemViaPointer(cJSON * const parent, cJSON * const item, cJSON * replacement);
 CJSON_PUBLIC(void) cJSON_ReplaceItemInArray(cJSON *array, int which, cJSON *newitem);
 
-CJSON_PUBLIC(void) cJSON_ReplaceItemInObject_mp(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
-CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive_mp(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObject_param(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
+CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive_param(cJSON *object,const char *string,cJSON *newitem, void * alloc_param);
 
 CJSON_PUBLIC(void) cJSON_ReplaceItemInObject(cJSON *object,const char *string,cJSON *newitem);
 CJSON_PUBLIC(void) cJSON_ReplaceItemInObjectCaseSensitive(cJSON *object,const char *string,cJSON *newitem);
 
 /* Duplicate a cJSON item */
-CJSON_PUBLIC(cJSON *) cJSON_Duplicate_mp(const cJSON *item, cJSON_bool recurse, void * alloc_param);
+CJSON_PUBLIC(cJSON *) cJSON_Duplicate_param(const cJSON *item, cJSON_bool recurse, void * alloc_param);
 /* Duplicate will create a new, identical cJSON item to the one you pass, in new memory that will
 need to be released. With recurse!=0, it will duplicate any children connected to the item.
 The item->next and ->prev pointers are always zero on return from Duplicate. */
@@ -329,15 +329,15 @@ CJSON_PUBLIC(void) cJSON_Minify(char *json);
 
 /* Helper functions for creating and adding items to an object at the same time.
  * They return the added item or NULL on failure. */
-CJSON_PUBLIC(cJSON*) cJSON_AddNullToObject_mp(cJSON * const object, const char * const name, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddTrueToObject_mp(cJSON * const object, const char * const name, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddFalseToObject_mp(cJSON * const object, const char * const name, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddBoolToObject_mp(cJSON * const object, const char * const name, const cJSON_bool boolean, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddNumberToObject_mp(cJSON * const object, const char * const name, const double number, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddStringToObject_mp(cJSON * const object, const char * const name, const char * const string, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddRawToObject_mp(cJSON * const object, const char * const name, const char * const raw, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddObjectToObject_mp(cJSON * const object, const char * const name, void * alloc_param);
-CJSON_PUBLIC(cJSON*) cJSON_AddArrayToObject_mp(cJSON * const object, const char * const name, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddNullToObject_param(cJSON * const object, const char * const name, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddTrueToObject_param(cJSON * const object, const char * const name, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddFalseToObject_param(cJSON * const object, const char * const name, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddBoolToObject_param(cJSON * const object, const char * const name, const cJSON_bool boolean, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddNumberToObject_param(cJSON * const object, const char * const name, const double number, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddStringToObject_param(cJSON * const object, const char * const name, const char * const string, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddRawToObject_param(cJSON * const object, const char * const name, const char * const raw, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddObjectToObject_param(cJSON * const object, const char * const name, void * alloc_param);
+CJSON_PUBLIC(cJSON*) cJSON_AddArrayToObject_param(cJSON * const object, const char * const name, void * alloc_param);
 
 /* Helper functions for creating and adding items to an object at the same time.
  * They return the added item or NULL on failure. */
