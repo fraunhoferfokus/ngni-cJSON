@@ -2422,9 +2422,9 @@ static cJSON_bool replace_item_in_object(cJSON *object, const char *string, cJSO
     if (!(replacement->type & cJSON_StringIsConst) && (replacement->string != NULL))
     {
 		if(alloc_param || global_hooks.use_custom_free_only_if_param == 0) {
-			cJSON_free(replacement->string, 1);
+			cJSON_free(replacement->string);
 		} else {
-			cJSON_free(replacement->string, 0);
+			cJSON_free(replacement->string);
 		}
 
     }
@@ -3228,12 +3228,7 @@ CJSON_PUBLIC(void *) cJSON_malloc(size_t size, void * alloc_param)
     return global_hooks.allocate(size, alloc_param);
 }
 
-CJSON_PUBLIC(void) cJSON_free(void *object, int use_custom_deallocate)
+CJSON_PUBLIC(void) cJSON_free(void *object)
 {
-	if(use_custom_deallocate) {
-		global_hooks.deallocate(object);
-	} else {
-		free(object);
-	}
-
+	global_hooks.deallocate(object);
 }

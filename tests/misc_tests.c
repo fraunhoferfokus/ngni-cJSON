@@ -323,7 +323,7 @@ static void cjson_replace_item_via_pointer_should_replace_items(void)
     TEST_ASSERT_NULL(replacements[2].next);
     TEST_ASSERT_TRUE(replacements[1].next == &(replacements[2]));
 
-    cJSON_free(array, 1);
+    cJSON_free(array);
 }
 
 static void cjson_replace_item_in_object_should_preserve_name(void)
