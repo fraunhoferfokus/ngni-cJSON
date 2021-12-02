@@ -175,7 +175,6 @@ CJSON_PUBLIC(void) cJSON_InitHooks(cJSON_Hooks* hooks)
         global_hooks.allocate = internal_malloc;
         global_hooks.deallocate = free;
         global_hooks.reallocate = realloc;
-		global_hooks.use_custom_free_only_if_param = 0;
         return;
     }
 
@@ -190,7 +189,6 @@ CJSON_PUBLIC(void) cJSON_InitHooks(cJSON_Hooks* hooks)
     {
         global_hooks.deallocate = hooks->free_fn;
     }
-	global_hooks.use_custom_free_only_if_param = hooks->use_custom_free_only_if_param;
 
     /* use realloc only if both free and malloc are used */
     global_hooks.reallocate = NULL;
