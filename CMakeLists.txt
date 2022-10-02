@@ -200,7 +200,8 @@ if(ENABLE_CJSON_UTILS)
     set_target_properties("${CJSON_UTILS_LIB}"
         PROPERTIES
             SOVERSION "${CJSON_UTILS_VERSION_SO}"
-            VERSION "${PROJECT_VERSION}")
+            VERSION "${PROJECT_VERSION}"
+            INSTALL_RPATH "$ORIGIN")
 endif()
 
 # create the other package config files
