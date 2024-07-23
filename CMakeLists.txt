@@ -134,6 +134,7 @@ else()
     add_library("${CJSON_LIB}-static" STATIC "${HEADERS}" "${SOURCES}")
     set_target_properties("${CJSON_LIB}-static" PROPERTIES OUTPUT_NAME "${CJSON_LIB}")
     set_target_properties("${CJSON_LIB}-static" PROPERTIES PREFIX "lib")
+    set_property(TARGET "${CJSON_LIB}-static" PROPERTY POSITION_INDEPENDENT_CODE ON)
 endif()
 if (NOT WIN32)
     target_link_libraries("${CJSON_LIB}" m)
@@ -188,6 +189,7 @@ if(ENABLE_CJSON_UTILS)
         target_link_libraries("${CJSON_UTILS_LIB}-static" "${CJSON_LIB}-static")
         set_target_properties("${CJSON_UTILS_LIB}-static" PROPERTIES OUTPUT_NAME "${CJSON_UTILS_LIB}")
         set_target_properties("${CJSON_UTILS_LIB}-static" PROPERTIES PREFIX "lib")
+        set_property(TARGET "${CJSON_UTILS_LIB}-static" PROPERTY POSITION_INDEPENDENT_CODE ON)
     endif()
 
     configure_file("${CMAKE_CURRENT_SOURCE_DIR}/library_config/libcjson_utils.pc.in"
@@ -267,6 +269,11 @@ option(ENABLE_CJSON_UNINSTALL "Enable creating uninstall target" ON)
 if(ENABLE_CJSON_UNINSTALL)
   add_custom_target(uninstall "${CMAKE_COMMAND}" -P
     "${PROJECT_SOURCE_DIR}/library_config/uninstall.cmake")
+endif()
+
+option(ENABLE_ENV_FEATURE "Enable support for Environment Variables (%VAR) in json" Off)
+if (ENABLE_ENV_FEATURE)
+    add_definitions(-DENABLE_ENV_FEATURE)
 endif()
 
 # Enable the use of locales

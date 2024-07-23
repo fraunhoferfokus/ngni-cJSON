@@ -98,6 +98,9 @@ then using the CJSON_API_VISIBILITY flag to "export" the same symbols the way CJ
 
 #define cJSON_IsReference 256
 #define cJSON_StringIsConst 512
+#ifdef ENABLE_ENV_FEATURE
+    #define cJSON_EnvironmentVar (1<<10)
+#endif
 
 /* The cJSON structure: */
 typedef struct cJSON
@@ -142,6 +145,11 @@ CJSON_PUBLIC(const char*) cJSON_Version(void);
 
 /* Supply malloc, realloc and free functions to cJSON */
 CJSON_PUBLIC(void) cJSON_InitHooks(cJSON_Hooks* hooks);
+
+#ifdef ENABLE_ENV_FEATURE
+CJSON_PUBLIC(void) cJSON_EnableFeatureEnvironmentVariables(void);
+CJSON_PUBLIC(void) cJSON_DisableFeatureEnvironmentVariables(void);
+#endif
 
 /* Memory Management: the caller is always responsible to free the results from all variants of cJSON_Parse (with cJSON_Delete) and cJSON_Print (with stdlib free, cJSON_Hooks.free_fn, or cJSON_free as appropriate). The exception is cJSON_PrintPreallocated, where the caller has full responsibility of the buffer. */
 /* Supply a block of JSON, and this returns a cJSON object you can interrogate. */
